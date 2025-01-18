@@ -1,9 +1,9 @@
 from typing import Generic, TypeVar, Optional, Callable
 
-__all__ = "Option"
+__all__ = ("Option")
 
-T = TypeVar('T')
-U = TypeVar('U')
+T = TypeVar("T")
+
 
 class Option(Generic[T]):
     """
@@ -22,12 +22,16 @@ class Option(Generic[T]):
         return Option.none()
     ```
     """
+
+    _value: T
+    _is_some: bool
+
     def __init__(self, value: Optional[T] = None):
         self._value = value
         self._is_some = value is not None
 
     @classmethod
-    def some(cls, value: T) -> 'Option[T]':
+    def some(cls, value: T) -> "Option[T]":
         """
         Create an instance containing a value.
 
@@ -45,7 +49,7 @@ class Option(Generic[T]):
         return cls(value)
 
     @classmethod
-    def none(cls) -> 'Option[T]':
+    def none(cls) -> "Option[T]":
         """
         Create an empty instance.
 
