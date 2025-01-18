@@ -1,10 +1,45 @@
 from typing import Generic, TypeVar, Union
 
-__all__ = "Result"
+__all__ = ("Result")
+
+from models.option import Option
 
 T = TypeVar("T")
 E = TypeVar("E")
 
+def ok(result: "Result[T, E]") -> T:
+    """
+    Extract the success value from a result if it exists
+
+    Args:
+        result: The result to extract from
+
+    Returns:
+        The ok value
+
+    Raises:
+        ValueError if the result contains an error value
+    """
+    if result.is_ok():
+        return result._value  # noqa
+    raise ValueError("Called Ok on Err value")
+
+def err(result: "Result[T, E]") -> E:
+    """
+    Extract the error value from a result if it exists
+
+    Args:
+        result: The result to extract from
+
+    Returns:
+        The err value
+
+    Raises:
+        ValueError if the result contains an ok value
+    """
+    if result.is_ok():
+        raise ValueError("Called Err on Ok value")
+    return result._value  # noqa
 
 class Result(Generic[T, E]):
     """
@@ -24,11 +59,20 @@ class Result(Generic[T, E]):
     ```
     """
 
-    _value: T
+    _value: Union[T, E]
+    _is_ok: bool
 
     def __init__(self, value: Union[T, E], is_ok: bool = False):
         self._value = value
         self._is_ok = is_ok
+
+    def __consume__(self):
+        """
+        Called to consume/clear the value.
+        Called after converting to Option to prevent reuse
+        """
+        self._value = None
+        self._is_ok = False
 
     @classmethod
     def ok(cls, value: T) -> "Result[T, E]":
@@ -77,3 +121,29 @@ class Result(Generic[T, E]):
         if self._is_ok:
             return self._value
         raise ValueError(f"Called unwrap on Err value: {self._value}")
+
+    @property
+    def err_to_option(self) -> Option[E]:
+        """
+        Converts from Result <T, E> to Option<E>, and discarding the success value if any.
+        Consumes self.
+
+        Returns:
+            An Option containing the error if any
+        """
+        if self._is_ok:
+            self.__consume__()
+        return Option(self._value)
+
+    @property
+    def ok_to_option(self) -> Option[T]:
+        """
+        Converts from Result <T, E> to Option<T>, and discarding the error value if any.
+        Consumes self.
+
+        Returns:
+            An Option containing the success value if any
+        """
+        if not self._is_ok:
+            self.__consume__()
+        return Option(self._value)
