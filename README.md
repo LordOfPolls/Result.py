@@ -34,39 +34,40 @@ Think of it as bringing some typing goodness to your error and null handling.
 
 ## Examples
 ```py
-# Result Example
 def divide(a: float, b: float) -> Result[float, str]:
-    if a == 0:
+    if b == 0:
         return Result.err("Division by zero")
     return Result.ok(a/b)
 
-# Option Example
-def get_user(user_id: int) -> Option[User]:
-    user = database.get_user(user_id)
-    if user:
-        return Option.some(user)
+if __name__ == "__main__":
+    success_result = divide(8, 4)
+    if success_result.is_ok():
+        value = ok(success_result)  
+        print(f"8 / 4 = {value}")
+    else:
+        error_msg = err(error_result)
+        print(f"Error: {error_msg}") 
+```
+
+```py
+@dataclass
+class User:
+    id: int
+    name: str
+
+def get_user(user_id: int, users: Dict[int, User]) -> Option[User]:
+    """Example of returning an Option type"""
+    if user_id in users:
+        return Option.some(users[user_id])
     return Option.none()
 
 if __name__ == "__main__":
-    # Result success case
-    result = divide(10, 2)
-    if result.is_ok():
-        print(f"10 / 2 = {result.unwrap()}")  # Prints: 10 / 2 = 5.0
-
-    # Result error case
-    result = divide(10, 0)
-    if result.is_err():
-        print("Error: Cannot divide by zero")  # Prints: Error: Cannot divide by zero
-
-    # Option some case
-    maybe_user = get_user(123)
-    if maybe_user.is_some():
-        print(f"Found user: {maybe_user.unwrap()}")
-
-    # Option none case
-    maybe_user = get_user(456)
-    if maybe_user.is_none():
-        print("User not found")
+    maybe_bob = get_user(456, users)
+    if maybe_bob.is_some():
+        user = some(maybe_bob) 
+        print(f"Found user: {user.name}")  
+    else:
+        print("User not found")  
 ```
 
 
