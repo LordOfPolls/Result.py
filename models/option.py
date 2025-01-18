@@ -4,6 +4,38 @@ __all__ = ("Option")
 
 T = TypeVar("T")
 
+def some(option: "Option[T]") -> T:
+    """
+    Extract the some value from an option
+
+    Args:
+        option: The option to extract from
+
+    Returns:
+        The some value
+
+    Raises:
+        ValueError if the option does not contain a some value
+    """
+    if option.is_some():
+        return option._value  # noqa
+    raise ValueError("Called Some on None value")
+
+def none(option: "Option[T]") -> None:
+    """
+    Affirm there is no Some value in an option
+
+    Args:
+        option: The option to extract from
+
+    Returns:
+        Nothing
+
+    Raises:
+        ValueError if the option contained a some value
+    """
+    if option.is_some():
+        raise ValueError("Called None on Some value")
 
 class Option(Generic[T]):
     """
